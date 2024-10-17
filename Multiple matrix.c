@@ -2,16 +2,16 @@
 #include <stdlib.h>
 
 typedef struct {
-	int** data;
 	int rows;
 	int cols;
+	int** data;
 } Matrix;
 
-void printMatrix(int** matrix, int rows, int cols) {
-	for (int i = 0; i < rows; i++) {
-		for (int j = 0; j < cols; j++) {
+void printMatrix(Matrix matrix) {
+	for (int i = 0; i < matrix.rows; i++) {
+		for (int j = 0; j < matrix.cols; j++) {
 
-			printf("%d ", matrix[i][j]);
+			printf("%d ", matrix.data[i][j]);
 		}
 		printf("\n");
 	}
@@ -49,43 +49,49 @@ int sumProd(int* arr1, int* arr2, int len) {
 	return sum;
 }
 
-int** transpose(int** matrix, int row, int col) {
+Matrix transpose(Matrix M) {
 
-	int** matrix_T = (int**)malloc(col * sizeof(int*));
 
-	for (int i = 0; i < col; i++) {
-		matrix_T[i] = (int*)malloc(row * sizeof(int));
+	int** matrix_data = (int**)malloc(M.cols * sizeof(int*));
+
+	for (int i = 0; i < M.cols; i++) {
+		matrix_data[i] = (int*)malloc(M.rows * sizeof(int));
 	}
 
-	for (int i = 0; i < row; i++) {
-		for (int j = 0; j < col; j++){
-			matrix_T[j][i] = matrix[i][j];
+	for (int i = 0; i < M.rows; i++) {
+		for (int j = 0; j < M.cols; j++){
+			matrix_data[j][i] = M.data[i][j];
 		}
 	}
+
+	Matrix matrix_T = { M.cols, M.rows, matrix_data };
+
 
 	return matrix_T;
 
 
 }
 
-int** multiplyMatrix(int** A, int** B, int A_row, int B_row, int B_col) {
+Matrix multiplyMatrix(Matrix A, Matrix B) {
 
 
-	int** matrix = malloc(A_row * sizeof(int*));
+	int** matrix = malloc(A.rows * sizeof(int*));
 
-	for (int i = 0; i < A_row; i++) {
-		matrix[i] = malloc(B_col * sizeof(int));
+	for (int i = 0; i < A.rows; i++) {
+		matrix[i] = malloc(B.cols * sizeof(int));
 	}
 
-	int** B_t = transpose(B, B_row, B_col);
+	Matrix B_t = transpose(B);
 
-	for (int i = 0; i < A_row; i++) {
-		for (int j = 0; j < B_col; j++) {
-			matrix[i][j] = sumProd(A[i], B_t[j], B_row);
+	for (int i = 0; i < A.rows; i++) {
+		for (int j = 0; j < B.cols; j++) {
+			matrix[i][j] = sumProd(A.data[i], B_t.data[j], B.rows);
 		}
 	}
 
-	return matrix;
+	Matrix result = { A.rows, B.cols, matrix };
+
+	return result;
 }
 
 int main()
@@ -93,25 +99,16 @@ int main()
 	int data_A[] = {1,4,2,5,3,6};
 	int data_B[] = {7,8,9,10,11,12};
 
-	Matrix A = { createMatrix(A.rows, A.cols, data_A), 3, 2 };
 
-	//int** A = ;
-	//int** B = createMatrix(2, 3, data_B);
+	Matrix A = { 3, 2, createMatrix(A.rows, A.cols, data_A)};
+	Matrix B = { 2, 3, createMatrix(B.rows, B.cols, data_B)};
 
-	//int** B_t = transpose(B, 2, 3);
-	//printMatrix(B_t, 3, 2);
 
-	//int a[] = { -1,1 };
-	//int b[] = { 100, 2 };
+	printMatrix(A);
+	printMatrix(B);
 
-	//int x = sumProd(&a, &b, 2);
-	//printf("%d", x);
-
-	printMatrix(A.data, A.rows, A.cols);
-	//printMatrix(B, 2, 3);
-
-	//int** mat = multiplyMatrix(A, B, 3, 2, 3);
-	//printMatrix(mat, 3, 3);
+	Matrix mat = multiplyMatrix(A, B);
+	printMatrix(mat);
 }
 
 
